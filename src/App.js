@@ -1,66 +1,51 @@
-import { Component } from "react";
-import logo from "./logo.svg";
+import { useState, useEffect } from "react";
 import CardList from "./components/card-list/card-list.component.jsx";
 import SearchBox from "./components/search-box/search-box.components.jsx";
 
 import "./App.css";
 
-class App extends Component {
-  constructor() {
-    super();
-    this.state = {
-      monsters: [],
-      searchField: "",
-    };
-  }
+const App = () => {
+  const [searchField, setSearchField] = useState(""); //[value, setValue]
+  const [monsters, setMonsters] = useState([]);
 
-  componentDidMount() {
+  // if initial values of monsters ever chasnges to some default values; hence setting default value to monsters
+  const [filteredMonsters, setFilteredMonster] = useState(monsters);
+
+  // we only want to fetch once the component is mounted; hence [] dependency array
+  useEffect(() => {
     fetch("https://jsonplaceholder.typicode.com/users")
       .then((response) => response.json())
-      .then((users) =>
-        this.setState(
-          () => {
-            return {
-              monsters: users,
-            };
-          }
-          // () => console.log(this.state)
-        )
-      );
-  }
+      .then((users) => setMonsters(users));
+  }, []);
 
-  // called when monster is searched in text box
-  onSearchChange = (event) => {
+  // sets the value of searchField to searched string
+  const onSearchChange = (event) => {
     // value getting from the UI
-    const searchField = event.target.value.toLocaleLowerCase();
-    this.setState(
-      () => {
-        return { searchField }; // updateing state of searchField
-      }
-      // () => console.log(this.state)
-    );
+    const searchFieldString = event.target.value.toLocaleLowerCase();
+
+    // sets searchField = searchFieldString
+    setSearchField(searchFieldString);
   };
 
-  render() {
-    const { monsters, searchField } = this.state;
-    const { onSearchChange } = this;
-
-    // keeping it outside onChange(); so that it's globally available
-    const filteredMonster = monsters.filter((monster) => {
+  // returns monsters matching the entered searched string
+  useEffect(() => {
+    const newFilteredMonster = monsters.filter((monster) => {
       return monster.name.toLocaleLowerCase().includes(searchField);
     });
-    return (
-      <div className="App">
-        <h1 className="app-title">Monsters Rolodex</h1>
-        <SearchBox
-          onChangeHandler={onSearchChange}
-          className="monsters-search-box"
-          placeholder="Input monsters"
-        />
-        <CardList monsters={filteredMonster} />
-      </div>
-    );
-  }
-}
+    setFilteredMonster(newFilteredMonster);
+  }, [monsters, searchField]);
+
+  return (
+    <div className="App">
+      <h1 className="app-title">Monsters Rolodex</h1>
+      <SearchBox
+        onChangeHandler={onSearchChange}
+        className="monsters-search-box"
+        placeholder="Input monsters"
+      />
+      <CardList monsters={filteredMonsters} />
+    </div>
+  );
+};
 
 export default App;
