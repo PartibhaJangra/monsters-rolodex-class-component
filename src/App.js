@@ -1,5 +1,4 @@
 import { Component } from "react";
-import logo from "./logo.svg";
 import CardList from "./components/card-list/card-list.component.jsx";
 import SearchBox from "./components/search-box/search-box.components.jsx";
 
